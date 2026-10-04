@@ -19,15 +19,17 @@ import com.exercice.project_management_tool.Repository.UserRepository;
 @Service
 public class ProjectService {
 
-    public final ProjectRepository projectRepository;
-    public final UserRepository userRepository;
-    public final ProjectMemberRepository projectMemberRepository;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectAccessService projectAccessService;
 
     ProjectService(ProjectRepository projectRepository, UserRepository userRepository,
-            ProjectMemberRepository projectMemberRepository) {
+            ProjectMemberRepository projectMemberRepository, ProjectAccessService projectAccessService) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.projectMemberRepository = projectMemberRepository;
+        this.projectAccessService = projectAccessService;
     }
 
     @Transactional 
@@ -50,11 +52,13 @@ public class ProjectService {
         return ProjectResponse.from(project);
     }
 
-    public List<ProjectResponse> findAll() {
-        return this.projectRepository.findAll().stream().map(ProjectResponse::from).toList();
+    public List<ProjectResponse> findByUser(Long userId) {
+        User user = this.userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return this.projectMemberRepository.findByUser(user).stream().map(member -> ProjectResponse.from(member.getProject())).toList();
     }
 
-    public ProjectResponse findById(Long id) {
+    public ProjectResponse findById(Long id, Long userId) {
+        this.projectAccessService.requireRole(id, userId);
         Project project = this.projectRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return ProjectResponse.from(project);
     }

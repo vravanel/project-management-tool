@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.exercice.project_management_tool.DTO.ProjectMemberInviteRequest;
@@ -29,18 +30,18 @@ public class ProjectMemberController {
 
     @PostMapping()
     public ProjectMemberResponse invite(@PathVariable Long projectId,
-            @RequestBody @Valid ProjectMemberInviteRequest request) {
-        return this.projectMemberService.invite(projectId, request);
+            @RequestBody @Valid ProjectMemberInviteRequest request, @RequestParam  Long userId) {
+        return this.projectMemberService.invite(projectId, request, userId);
     }
 
     @GetMapping()
-    public List<ProjectMemberResponse> findByProject(@PathVariable Long projectId) {
-        return this.projectMemberService.findByProject(projectId);
+    public List<ProjectMemberResponse> findByProject(@PathVariable Long projectId, @RequestParam Long userId) {
+        return this.projectMemberService.findByProject(projectId, userId);
     }
 
     @PutMapping("/{memberId}")
     public ProjectMemberResponse updateRole(@PathVariable Long projectId, @PathVariable Long memberId,
-            @RequestBody @Valid ProjectMemberRoleUpdateRequest request) {
-        return this.projectMemberService.updateRole(memberId, request);
+            @RequestBody @Valid ProjectMemberRoleUpdateRequest request, @RequestParam Long userId) {
+        return this.projectMemberService.updateRole(memberId, request, projectId, userId);
     }
 }

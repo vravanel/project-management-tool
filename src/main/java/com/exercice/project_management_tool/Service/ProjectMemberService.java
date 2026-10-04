@@ -21,15 +21,19 @@ public class ProjectMemberService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectAccessService projectAccessService;
 
     ProjectMemberService(ProjectRepository projectRepository, UserRepository userRepository,
-            ProjectMemberRepository projectMemberRepository) {
+            ProjectMemberRepository projectMemberRepository, ProjectAccessService projectAccessService) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.projectMemberRepository = projectMemberRepository;
+        this.projectAccessService = projectAccessService;
     }
 
-    public ProjectMemberResponse invite(Long projectId, ProjectMemberInviteRequest request) {
+    public ProjectMemberResponse invite(Long projectId, ProjectMemberInviteRequest request, Long requesterId) {
+        this.projectAccessService.requireRole(projectId, requesterId, ProjectMember.Role.ADMINISTRATEUR);
+
         Project project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -48,16 +52,25 @@ public class ProjectMemberService {
         return ProjectMemberResponse.from(this.projectMemberRepository.save(member));
     }
 
-    public List<ProjectMemberResponse> findByProject(Long projectId) {
+    public List<ProjectMemberResponse> findByProject(Long projectId, Long requesterId) {
+        this.projectAccessService.requireRole(projectId, requesterId);
+
         Project project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         return this.projectMemberRepository.findByProject(project).stream().map(ProjectMemberResponse::from).toList();
     }
 
-    public ProjectMemberResponse updateRole(Long memberId, ProjectMemberRoleUpdateRequest request) {
+    public ProjectMemberResponse updateRole(Long memberId, ProjectMemberRoleUpdateRequest request, Long projectId,
+            Long requesterId) {
+        this.projectAccessService.requireRole(projectId, requesterId, ProjectMember.Role.ADMINISTRATEUR);
+
         ProjectMember member = this.projectMemberRepository.findById(memberId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!member.getProject().getId().equals(projectId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce membre n'appartient pas à ce projet");
+        }
 
         member.setRole(request.role());
 

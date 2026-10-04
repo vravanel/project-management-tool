@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.exercice.project_management_tool.DTO.ProjectCreateRequest;
@@ -26,8 +27,8 @@ public class ProjectController {
     }
 
     @GetMapping()
-    public List<ProjectResponse> findAll() {
-        return this.projectService.findAll();
+    public List<ProjectResponse> findByUser(@RequestParam Long userId) {
+        return this.projectService.findByUser(userId);
     }
 
     @PostMapping("/{userId}")
@@ -36,8 +37,8 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ProjectResponse findById(@PathVariable Long id) {
-        return this.projectService.findById(id);
+    public ProjectResponse findById(@PathVariable Long id, @RequestParam Long userId) {
+        return this.projectService.findById(id, userId);
     }
 
 }
