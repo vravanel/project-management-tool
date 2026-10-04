@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.exercice.project_management_tool.DTO.ProjectCreateRequest;
+import com.exercice.project_management_tool.DTO.ProjectResponse;
 import com.exercice.project_management_tool.Entity.Project;
 import com.exercice.project_management_tool.Entity.ProjectMember;
 import com.exercice.project_management_tool.Entity.User;
@@ -27,20 +30,32 @@ public class ProjectService {
         this.projectMemberRepository = projectMemberRepository;
     }
 
-    public Project create(Project project, Long userId) {
+    @Transactional 
+    public ProjectResponse create(ProjectCreateRequest request, Long userId) {
         User user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Project project = new Project();
         project.setCreator(user);
+        project.setDescription(request.description());
+        project.setTitle(request.title());
+        project.setStartDate(request.startDate());
         ProjectMember projectMember = new ProjectMember();
         projectMember.setRole(ProjectMember.Role.ADMINISTRATEUR);
         projectMember.setProject(project);
         projectMember.setUser(user);
         this.projectRepository.save(project);
         this.projectMemberRepository.save(projectMember);
-        return project;
+
+        return ProjectResponse.from(project);
     }
 
-    public List<Project> findAll() {
-       return this.projectRepository.findAll();
+    public List<ProjectResponse> findAll() {
+        return this.projectRepository.findAll().stream().map(ProjectResponse::from).toList();
+    }
+
+    public ProjectResponse findById(Long id) {
+        Project project = this.projectRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return ProjectResponse.from(project);
     }
 }
