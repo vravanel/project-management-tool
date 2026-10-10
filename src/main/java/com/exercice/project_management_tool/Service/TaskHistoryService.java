@@ -6,45 +6,35 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.exercice.project_management_tool.DTO.TaskHistoryResponse;
 import com.exercice.project_management_tool.Entity.Task;
 import com.exercice.project_management_tool.Entity.TaskHistory;
-import com.exercice.project_management_tool.Entity.User;
 import com.exercice.project_management_tool.Repository.TaskHistoryRepository;
 import com.exercice.project_management_tool.Repository.TaskRepository;
-import com.exercice.project_management_tool.Repository.UserRepository;
-
-import jakarta.annotation.Nullable;
 
 @Service
 public class TaskHistoryService {
 
-    public final TaskHistoryRepository taskHistoryRepository;
-    public final TaskRepository taskRepository;
-    public final UserRepository userRepository;
+    private final TaskHistoryRepository taskHistoryRepository;
+    private final TaskRepository taskRepository;
+    private final ProjectAccessService projectAccessService;
 
     TaskHistoryService(TaskHistoryRepository taskHistoryRepository, TaskRepository taskRepository,
-            UserRepository userRepository) {
+            ProjectAccessService projectAccessService) {
         this.taskHistoryRepository = taskHistoryRepository;
         this.taskRepository = taskRepository;
-        this.userRepository = userRepository;
+        this.projectAccessService = projectAccessService;
     }
 
-    public TaskHistory create(TaskHistory taskHistory, @Nullable Long userId, Long taskId) {
-        if (userId != null) {
-            User user = this.userRepository.findById(userId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-            taskHistory.setUser(user);
-        }
+    public List<TaskHistoryResponse> findByTask(Long taskId, Long requesterId) {
         Task task = this.taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        taskHistory.setTask(task);
-        return this.taskHistoryRepository.save(taskHistory);
+        this.projectAccessService.requireRole(task.getProject().getId(), requesterId);
+        return this.taskHistoryRepository.findByTask(task).stream().map(TaskHistoryResponse::from).toList();
     }
 
-    public List<TaskHistory> findByTask(Long taskId) {
-        Task task = this.taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return this.taskHistoryRepository.findByTask(task);
+    public void save(TaskHistory history) {
+        this.taskHistoryRepository.save(history);
     }
 
 }
