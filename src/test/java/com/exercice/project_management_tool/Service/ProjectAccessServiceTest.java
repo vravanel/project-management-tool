@@ -88,4 +88,12 @@ public class ProjectAccessServiceTest {
 
         assertThat(result.getRole()).isEqualTo(ProjectMember.Role.OBSERVATEUR);
     }
+
+    @Test 
+    void requireRole_utilisateurInconnu_leve404() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertStatus(() -> projectAccessService.requireRole(1L, 2L), HttpStatus.NOT_FOUND);
+    }
 }
