@@ -1,0 +1,17 @@
+<div class="card">
+    <h2>Inscription</h2>
+    <form (ngSubmit)="submit()">
+        <label>Nom utilisateur</label>
+        <input type="text" name="username" [(ngModel)]="username" required/>
+        <label>Email</label>
+        <input type="email" name="email" [(ngModel)]="email")] required/>
+        <label>Mot de passe</label>
+        <input type="password" name="password" [(ngModel)]="password" required minlength="8"/>
+        <p>8 caractères minimum</p>
+    @if (error()) {
+        <p class="error">{{error()}}</p>
+    }
+    <button type="submit">Créer mon compte</button>
+    </form>
+    <a [routerLink]="['/login']">Se connecter</a>
+</div>
