@@ -3,6 +3,7 @@
     <h2>{{project.title}}</h2>
     <p>{{ project.description}}</p>
     <p>Créé par {{project.creator.username}}, début le {{project.startDate | date: 'dd/MM/yyyy' }}</p>
+    <a [routerLink]="['/projects', project.id, 'tasks']">Voir les tâches</a>
 </div>
 }
 @if (error()) {

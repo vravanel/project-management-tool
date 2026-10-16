@@ -1,0 +1,30 @@
+<h2>Tableau de bord</h2>
+
+<p>
+    <a [routerLink]="['/projects', id()]">Retour au projet</a>
+    @if (canEdit()) {
+    | <a [routerLink]="['/projects', id(), 'tasks', 'new']">Nouvelle tâche</a>
+    }
+</p>
+
+@if (error()) {
+<p class="error">{{ error() }}</p>
+}
+
+<div class="board">
+    @for (column of columns; track column.status) {
+    <section class="card">
+        <h3>{{column.label}} ({{tasksOf(column.status).length}})</h3>
+        @for (task of tasksOf(column.status); track task.id) {
+        <div class="task">
+            <a [routerLink]="['/tasks', task.id]">{{task.name}}</a>
+            <p>Priorité: {{ task.priority }}</p>
+            <p>Echéance: {{task.dueDate | date: 'dd/MM/yyyy'}}</p>
+            <p>Assignée à: {{ task.assignee?.username ?? 'personne' }}</p>
+        </div>
+        } @empty {
+        <p>Aucune tâche</p>
+        }
+    </section>
+    }
+</div>

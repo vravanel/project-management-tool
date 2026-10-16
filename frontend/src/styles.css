@@ -61,3 +61,18 @@ th, td {
 .card + .card {
     margin-top: 1rem;
 }
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 1rem;
+}
+
+.task {
+    border-top: 1px solid #e3e8ef;
+    padding: 0.6rem 0;
+}
+
+.task p {
+    margin: 0.2rem 0;
+}
