@@ -1,0 +1,17 @@
+<div class="card">
+    <h2>Nouveau projet</h2>
+    <form (ngSubmit)="submit()">
+        <label>titre</label>
+        <input type="text" name="title" [(ngModel)]="title" required minlength="2" maxlength="100" />
+        <label>Description</label>
+        <textarea name="description" [(ngModel)]="description" required minlength="5"></textarea>
+        <label>Date de début</label>
+        <input type="date" name="startDate" [(ngModel)]="startDate" required />
+
+        @if (error()) {
+        <p class="error">{{error()}}</p>
+        }
+        <button type="submit">Créer le projet</button>
+    </form>
+    <a routerLink="/projects">Retour aux projets</a>
+</div>

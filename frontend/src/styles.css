@@ -47,3 +47,17 @@ label {
 .error {
     color: #c0392b;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 0.4rem;
+}
+
+.card + .card {
+    margin-top: 1rem;
+}

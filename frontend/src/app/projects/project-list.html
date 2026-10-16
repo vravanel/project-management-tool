@@ -1,0 +1,22 @@
+<div class="card">
+    <h2>Mes projets</h2>
+    <a routerLink="/projects/new">Créer un projet</a>
+
+    @if (error()) {
+        <p class="error">{{error()}}</p>
+    }
+    
+    @if (projects().length === 0 && !error()) {
+        <p>Vous n'avez aucun projet pour le moment</p>
+    }
+
+    <ul>
+        @for (project of projects(); track project.id) {
+            <li>
+                <p><a [routerLink]="['/projects', project.id]">{{project.title}} </a>
+                    crée par {{ project.creator.username}}, début le {{project.startDate | date: 'dd/MM/yyyy'}}
+                </p>
+            </li>
+        }
+    </ul>
+</div>
