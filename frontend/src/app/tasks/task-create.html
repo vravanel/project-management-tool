@@ -1,0 +1,30 @@
+<div class="card">
+    <h2>Nouvelle tâche</h2>
+    <form (ngSubmit)="submit()">
+        <label>Nom</label>
+        <input type="text" name="name" [(ngModel)]="name" required minlength="2" maxlength="100" />
+        <label>Description</label>
+        <textarea name="description" [(ngModel)]="description" required minlength="5"></textarea>
+        <label>Priorité</label>
+        <select name="priority" [(ngModel)]="priority">
+            @for (p of priorities; track p) {
+            <option [value]="p">{{ p }}</option>
+            }
+        </select>
+        <label>Date d'échéance</label>
+        <input type="date" name="dueDate" [(ngModel)]="dueDate" required />
+        <label>Assignée à</label>
+        <select name="assigneeId" [(ngModel)]="assigneeId">
+            <option [ngValue]="null">Personne</option>
+            @for (member of members(); track member.id) {
+            <option [ngValue]="member.user.id">{{member.user.username}} {{ member.role }}</option>
+            }
+        </select>
+
+        @if (error()) {
+        <p class="error">{{ error() }}</p>
+        }
+        <button type="submit">Créer la tâche</button>
+    </form>
+    <a [routerLink]="['/projects', id(), 'tasks']">Retour au tableau</a>
+</div>
