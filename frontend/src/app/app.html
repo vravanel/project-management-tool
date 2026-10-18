@@ -1,10 +1,11 @@
 <header class="topbar">
   <a routerLink="/projects" class="brand">PMT</a>
   @if (auth.user(); as user) {
-    <nav class="user-zone">
-      <span>{{user.username}}</span>
-      <button type="button" (click)="logout()">Se déconnecter</button>
-    </nav>
+  <nav class="user-zone">
+    <a routerLink="/notifications">Notifications ({{ notificationService.unreadCount() }})</a>
+    <span>{{user.username}}</span>
+    <button type="button" (click)="logout()">Se déconnecter</button>
+  </nav>
   }
 </header>
 

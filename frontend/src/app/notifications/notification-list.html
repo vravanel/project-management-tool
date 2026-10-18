@@ -1,0 +1,25 @@
+<div class="card">
+    <h2>Mes notifications</h2>
+
+    @if (error()) {
+    <p class="error">{{ error() }}</p>
+    }
+
+    <ul>
+        @for (notification of sorted(); track notification.id) {
+        <li>
+            {{ notification.sentAt | date: 'dd/MM/yyyy HH:mm'}} -
+            {{ describe(notification) }} :
+            <a [routerLink]="['/tasks', notification.taskId]">{{ notification.taskName }}</a>
+            @if (notification.isRead) {
+            (lue)
+            } @else {
+            <button type="button" (click)="markAsRead(notification)">Marquer comme lue</button>
+            }
+        </li>
+        } @empty {
+        <li>Aucuune notification</li>
+        }
+    </ul>
+
+</div>

@@ -51,7 +51,7 @@ export interface AppNotification {
     taskId: number;
     taskName: string;
     type: string;
-    sendAt: string;
+    sentAt: string;
     isRead: boolean;
 }
 

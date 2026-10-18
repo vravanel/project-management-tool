@@ -8,6 +8,7 @@ import { ProjectDetail } from './projects/project-detail';
 import { TaskBoard } from './tasks/task-board';
 import { TaskCreate } from './tasks/task-create';
 import { TaskDetail } from './tasks/task-detail';
+import { NotificationList } from './notifications/notification-list';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
@@ -18,5 +19,6 @@ export const routes: Routes = [
   { path: 'projects/:id/tasks', component: TaskBoard, canActivate: [authGuard] },
   { path: 'projects/:id/tasks/new', component: TaskCreate, canActivate: [authGuard] },
   { path: 'tasks/:id', component: TaskDetail, canActivate: [authGuard] },
+  { path: 'notifications', component: NotificationList, canActivate: [authGuard] },
   { path: '', redirectTo: 'projects', pathMatch: 'full' },
 ];
