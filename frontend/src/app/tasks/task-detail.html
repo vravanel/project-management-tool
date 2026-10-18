@@ -1,0 +1,81 @@
+@if (task(); as task) {
+<div class="card">
+    <h2>{{ task.name }}</h2>
+    <a [routerLink]="['/projects', task.projectId, 'tasks']">Retour au tableau de board</a>
+
+    @if (canEdit()) {
+    <form (ngSubmit)="save()">
+        <label>Nom</label>
+        <input type="text" name="name" [(ngModel)]="name" required minlength="2" maxlength="100" />
+        <label>Description</label>
+        <textarea name="description" [(ngModel)]="description" required minlength="5"></textarea>
+        <label>Priorité</label>
+        <select name="priority" [(ngModel)]="priority">
+            @for (p of priorities; track p) {
+            <option [value]="p">{{ p }}</option>
+            }
+        </select>
+        <label>Statut</label>
+        <select name="status" [(ngModel)]="status">
+            @for (s of statuses; track s) {
+            <option [value]="s">{{ s }}</option>
+            }
+        </select>
+        <label>Date d'échéance</label>
+        <input type="date" name="dueDate" [(ngModel)]="dueDate" required />
+        <label>Date de fin</label>
+        <input type="date" name="endDate" [(ngModel)]="endDate" />
+        <label>Assignée à</label>
+        <select name="assigneeId" [(ngModel)]="assigneeId">
+            <option [ngValue]="null">Personne</option>
+            @for (member of members(); track member.id) {
+            <option [ngValue]="member.user.id">{{ member.user.username }} ({{ member.role }})</option>
+            }
+        </select>
+        <button type="submit">Enregistrer</button>
+    </form>
+    } @else {
+    <p>{{ task.description }}</p>
+    <p>Priorité {{ task.priority }}</p>
+    <p>Statut : {{ task.status }}</p>
+    <p>Echéance : {{ task.dueDate | date: 'dd/MM/yyyy' }}</p>
+    <p>Assignée à {{ task.assignee?.username ?? 'personne' }}</p>
+    }
+</div>
+}
+@if (message()) {
+<p>{{ message() }}</p>
+}
+@if (error()) {
+<p class="error">{{ error() }}</p>
+}
+
+<div class="card">
+    <h3>Historique des modifications</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Par</th>
+                <th>Champs</th>
+                <th>Ancienne valeur</th>
+                <th>Nouvelle valeur</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (entry of history(); track entry.id) {
+            <tr>
+                <td>{{ entry.modifiedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ entry.user?.username ?? 'inconnu' }}</td>
+                <td>{{ label(entry.fieldName) }}</td>
+                <td>{{ entry.fieldValueOld ?? '-' }}</td>
+                <td>{{ entry.fieldValueNew ?? '-' }}</td>
+            </tr>
+            } @empty {
+            <tr>
+                <td colspan="5">Aucune modification pour le moment</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
