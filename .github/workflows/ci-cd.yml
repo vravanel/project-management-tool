@@ -1,0 +1,108 @@
+name: CI/CD
+
+on: 
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Donner les droits d'exécution
+        run: chmod +x mvnw
+
+      - name: Compiler et lancer les tests
+        run: ./mvnw -B clean verify
+
+      - name: Publier le rapport de couverture du backend
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: 
+          name: couverture-backend
+          path: target/site/jacoco
+
+  frontend:
+      name: frontend
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: frontend
+      steps:
+        - name: Récupérer le code
+          uses: actions/checkout@v4
+
+        - name: Installer Node.js 22
+          uses: actions/setup-node@v4
+          with:
+            node-version: 22
+            cache: npm
+            cache-dependency-path: frontend/package-lock.json
+
+        - name: Installer les dépendance
+          run: npm ci --legacy-peer-deps
+
+        - name: Compiler l'appliction
+          run: npm run build
+
+        - name: Lancer les tests
+          run: npx ng test --no-watch --coverage  
+
+        - name: Publier le rapport de couverture
+          if: always()
+          uses: actions/upload-artifact@v4
+          with: 
+            name: couverture-frontend
+            path: frontend/coverage
+
+  docker:
+        name: docker
+        needs: [backend, frontend]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+          - name: Récupérer le code
+            uses: actions/checkout@v4
+
+          - name: Préparer Docker Buildx
+            uses: docker/setup-buildx-action@v3
+
+          - name: Se connecter à Docker Hub
+            uses: docker/login-action@v3
+            with:
+              username: ${{ secrets.DOCKERHUB_USERNAME }}
+              password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+          - name: Construire et publier l'image du backend
+            uses: docker/build-push-action@v6
+            with:
+              context: .
+              push: true
+              tags: |
+                ${{ secrets.DOCKERHUB_USERNAME }}/pmt-backend:latest
+                ${{ secrets.DOCKERHUB_USERNAME }}/pmt-backend:${{ github.sha }}
+              cache-from: type=gha,scope=backend
+              cache-to: type=gha,scope=backend,mode=max  
+
+          - name: Construire et publier l'image du frontend
+            uses: docker/build-push-action@v6
+            with:
+              context: ./frontend
+              push: true
+              tags: |
+                ${{ secrets.DOCKERHUB_USERNAME }}/pmt-frontend:latest
+                ${{ secrets.DOCKERHUB_USERNAME }}/pmt-frontend:${{ github.sha }}
+              cache-from: type=gha,scope=frontend
+              cache-to: type=gha,scope=frontend,mode=max
