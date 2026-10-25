@@ -13,6 +13,10 @@ import com.exercice.project_management_tool.Repository.ProjectMemberRepository;
 import com.exercice.project_management_tool.Repository.ProjectRepository;
 import com.exercice.project_management_tool.Repository.UserRepository;
 
+/**
+ * Controôle les droits sur un projet
+ * ProjectAccessService
+ */
 @Service
 public class ProjectAccessService {
 
@@ -27,6 +31,13 @@ public class ProjectAccessService {
         this.projectMemberRepository = projectMemberRepository;
     }
 
+    /**
+     * Vérifie que l'utilisateur est membre du projet et si y'a des rôles
+     * Sans rôle en paramètre, n'importe quel membre est accepté
+     * @param projectId identifiant du projet
+     * @param userId identifiant de l'utilisateur
+     * @param allowedRoles rôles autorisés (falcultatif)
+     */
     public ProjectMember requireRole(Long projectId, Long userId, ProjectMember.Role... allowedRoles) {
         Project project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet introuvable"));

@@ -21,6 +21,10 @@ import com.exercice.project_management_tool.Repository.ProjectRepository;
 import com.exercice.project_management_tool.Repository.TaskRepository;
 import com.exercice.project_management_tool.Repository.UserRepository;
 
+/**
+ * Gestion des tâches (création, consultation, modification avec historique et notification)
+ * TaskService
+ */
 @Service
 public class TaskService {
 
@@ -44,6 +48,12 @@ public class TaskService {
         this.projectMemberRepository = projectMemberRepository;
     }
 
+    /**
+     * Crée une tâche au statut A_FAIRE. Réservé aux admins et membres
+     * @param projectId identifiant du projet
+     * @param request données de la tâche
+     * @param requesterId identifiant de l'utilisateur qui crée la tâche
+     */
     public TaskResponse create(Long projectId, TaskCreateRequest request, Long requesterId) {
         this.projectAccessService.requireRole(projectId, requesterId, ProjectMember.Role.ADMINISTRATEUR,
                 ProjectMember.Role.MEMBRE);
@@ -72,12 +82,22 @@ public class TaskService {
         return TaskResponse.from(saved);
     }
 
+    /**
+     * Renvoie une tâche uniquement pour les membres. 
+     * @param id identifiant de la tâche
+     * @param requesterId identifiant de l'utilisateur qui consulte
+     */
     public TaskResponse findById(Long id, Long requesterId) {
         Task task = this.findEntityById(id);
         this.projectAccessService.requireRole(task.getProject().getId(), requesterId);
         return TaskResponse.from(task);
     }
 
+    /**
+     * Renvoie toutes les tâches d'un projet uniquement pour les membres du projet
+     * @param projectId identifiant du projet
+     * @param requesterId identifiant de l'utilisateur qui consulte
+     */
     public List<TaskResponse> findByProject(Long projectId, Long requesterId) {
         this.projectAccessService.requireRole(projectId, requesterId);
         Project project = this.projectRepository.findById(projectId)
@@ -86,6 +106,12 @@ public class TaskService {
         return this.taskRepository.findByProject(project).stream().map(TaskResponse::from).toList();
     }
 
+    /**
+     * Renvoie les tâches d'un projet qui ont un statut donné
+     * @param projectId identifiant du projet
+     * @param status statut recherché
+     * @param requesterId identifiant de l'utilisateur qui consulte
+     */
     public List<TaskResponse> findByProjectAndStatus(Long projectId, Task.Status status, Long requesterId) {
         this.projectAccessService.requireRole(projectId, requesterId);
         Project project = this.projectRepository.findById(projectId)
@@ -94,10 +120,19 @@ public class TaskService {
         return this.taskRepository.findByProjectAndStatus(project, status).stream().map(TaskResponse::from).toList();
     }
 
+    /**
+     * Retrouve une tâche
+     * @param id identifiant de la tâche
+     */
     private Task findEntityById(Long id) {
         return this.taskRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * Retrouve l'utilisateur assigné et vérifie qu'il est bien membre du projet
+     * @param project le projet de la tâche
+     * @param assigneeId identifiant de l'utilisateur à assigner
+     */
     private User findAssignee(Project project, Long assigneeId) {
         User assignee = this.userRepository.findById(assigneeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assigné introuvable"));
@@ -106,6 +141,15 @@ public class TaskService {
         return assignee;
     }
 
+    /**
+     * Ajoute une ligne à la liste d'historique si la valeur change
+     * @param changes liste des lignes d'historique en cours de préparation
+     * @param task la tâche modifiée
+     * @param editor l'utilisateur qui fait la modification
+     * @param field nom du champ modifié
+     * @param oldValue valeur actuelle 
+     * @param newValue nouvelle valeur
+     */
     private void trackChange(List<TaskHistory> changes, Task task, User editor, String field, Object oldValue,
             Object newValue) {
 
@@ -120,6 +164,12 @@ public class TaskService {
         }
     }
 
+    /**
+     * Modifie une tâche uniquement pour les membres du projet
+     * @param id identifiant de la tâche
+     * @param request nouvelles valeurs de la tâche
+     * @param requesterId identifiant de l'utilisateur qui modifie
+     */
     public TaskResponse update(Long id, TaskUpdateRequest request, Long requesterId) {
         Task task = this.findEntityById(id);
         ProjectMember editorMember = this.projectAccessService.requireRole(task.getProject().getId(), requesterId,

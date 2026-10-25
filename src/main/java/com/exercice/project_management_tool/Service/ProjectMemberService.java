@@ -16,6 +16,10 @@ import com.exercice.project_management_tool.Repository.ProjectMemberRepository;
 import com.exercice.project_management_tool.Repository.ProjectRepository;
 import com.exercice.project_management_tool.Repository.UserRepository;
 
+/**
+ * Gestion des membres d'un projet et de leurs rôles
+ * ProjectMemberService
+ */
 @Service
 public class ProjectMemberService {
     private final UserRepository userRepository;
@@ -31,6 +35,12 @@ public class ProjectMemberService {
         this.projectAccessService = projectAccessService;
     }
 
+    /**
+     * Ajoute un utilisateur au projet avec un rôle. Uniquement pour les admins
+     * @param projectId identifiant projet
+     * @param request email de l'utilisateur à inviter et rôle à lui donner
+     * @param requesterId identifiant de l'admin qui l'invite
+     */
     public ProjectMemberResponse invite(Long projectId, ProjectMemberInviteRequest request, Long requesterId) {
         this.projectAccessService.requireRole(projectId, requesterId, ProjectMember.Role.ADMINISTRATEUR);
 
@@ -52,6 +62,11 @@ public class ProjectMemberService {
         return ProjectMemberResponse.from(this.projectMemberRepository.save(member));
     }
 
+    /**
+     * Liste les membres d'un projet uniquement pour les membres du projet
+     * @param projectId identifiant du projet
+     * @param requesterId identifiant de l'utilisateur qui consulte
+     */
     public List<ProjectMemberResponse> findByProject(Long projectId, Long requesterId) {
         this.projectAccessService.requireRole(projectId, requesterId);
 
@@ -61,6 +76,13 @@ public class ProjectMemberService {
         return this.projectMemberRepository.findByProject(project).stream().map(ProjectMemberResponse::from).toList();
     }
 
+    /**
+     * Change le rôle d'un membre uniquement pour les admins
+     * @param memberId identifiant du membre du projet
+     * @param request nouveau rôle
+     * @param projectId identifiant du projet
+     * @param requesterId identifiant de l'admin qui modifie
+     */
     public ProjectMemberResponse updateRole(Long memberId, ProjectMemberRoleUpdateRequest request, Long projectId,
             Long requesterId) {
         this.projectAccessService.requireRole(projectId, requesterId, ProjectMember.Role.ADMINISTRATEUR);

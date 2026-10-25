@@ -11,6 +11,10 @@ import com.exercice.project_management_tool.DTO.UserResponse;
 import com.exercice.project_management_tool.Entity.User;
 import com.exercice.project_management_tool.Repository.UserRepository;
 
+/**
+ * Inscription et connexion des utilisateurs
+ * UserService
+ */
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -20,6 +24,10 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Crée un compte. Le mot de passe est haché avant d'être enregistré
+     * @param request nom d'utilisateur, email et mot de passe
+     */
     public UserResponse register(UserRegisterRequest request) {
         this.userRepository.findByEmail(request.email()).ifPresent(u -> {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email existe déjà");
@@ -33,6 +41,10 @@ public class UserService {
         return UserResponse.from(this.userRepository.save(user));
     }
 
+    /**
+     * Vérifie l'email et le mot de passe
+     * @param request email et mot de passe
+     */
     public UserResponse login(UserLoginRequest request) {
         User user = this.userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides"));

@@ -16,6 +16,10 @@ import com.exercice.project_management_tool.Repository.ProjectMemberRepository;
 import com.exercice.project_management_tool.Repository.ProjectRepository;
 import com.exercice.project_management_tool.Repository.UserRepository;
 
+/**
+ * Création et consultation des projets
+ * ProjectService
+ */
 @Service
 public class ProjectService {
 
@@ -32,6 +36,11 @@ public class ProjectService {
         this.projectAccessService = projectAccessService;
     }
 
+    /**
+     * Crée le projet et son créateur devient admin du projet
+     * @param request données du projet
+     * @param userId identifiant de l'utilisateur
+     */
     @Transactional 
     public ProjectResponse create(ProjectCreateRequest request, Long userId) {
         User user = this.userRepository.findById(userId)
@@ -52,11 +61,20 @@ public class ProjectService {
         return ProjectResponse.from(project);
     }
 
+    /**
+     * Renvoie les projets dont l'utilisateur est membre
+     * @param userId identifiant de l'utilisateur
+     */
     public List<ProjectResponse> findByUser(Long userId) {
         User user = this.userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return this.projectMemberRepository.findByUser(user).stream().map(member -> ProjectResponse.from(member.getProject())).toList();
     }
 
+    /**
+     * Renvoie un projet uniquement si l'utilisateur est membre
+     * @param id identifiant du projet
+     * @param userId identifiant de l'utilisateur
+     */
     public ProjectResponse findById(Long id, Long userId) {
         this.projectAccessService.requireRole(id, userId);
         Project project = this.projectRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));

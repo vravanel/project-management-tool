@@ -16,6 +16,10 @@ import com.exercice.project_management_tool.Entity.User;
 import com.exercice.project_management_tool.Repository.NotificationRepository;
 import com.exercice.project_management_tool.Repository.UserRepository;
 
+/**
+ * Notifications d'assignation de la tâche
+ * NotificationService
+ */
 @Service
 public class NotificationService {
 
@@ -30,6 +34,10 @@ public class NotificationService {
         this.mailSender = mailSender;
     }
 
+    /**
+     * Notifie l'utilisateur assigné à une tâche (notifie + email)
+     * @param task la tâche qui vient d'être assignée
+     */
     public void notifyAssignment(Task task) {
         User assignee = task.getUser();
         if (assignee == null) {
@@ -53,6 +61,10 @@ public class NotificationService {
        }
     }
 
+    /**
+     * Liste les notifications d'un utilisateur
+     * @param userId identifiant d'un utilisateur
+     */
     public List<NotificationResponse> findByUser(Long userId) {
         User user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -60,6 +72,11 @@ public class NotificationService {
                 .toList();
     }
 
+    /**
+     * Marque une notification comme lue
+     * @param id identifiant de la notification
+     * @param userId identifiant d'un utilisateur
+     */
     public NotificationResponse markAsRead(Long id, Long userId) {
         Notification newNotification = this.notificationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
