@@ -11,7 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.exercice.project_management_tool.DTO.TaskHistoryResponse;
 import com.exercice.project_management_tool.Service.TaskHistoryService;
 
-@RestController 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "Historique des tâches", description = "Suivi des modifications des tâches")
+@RestController
 @RequestMapping("/api/tasks/{taskId}/history")
 public class TaskHistoryController {
 
@@ -21,9 +28,17 @@ public class TaskHistoryController {
         this.taskHistoryService = taskHistoryService;
     }
 
+    @Operation(summary = "Consulter l'historique d'une tâche", description = "Liste les modifications de la tâche")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Historique de la tâche"),
+            @ApiResponse(responseCode = "403", description = "L'utilisateur n'est pas membre du projet"),
+            @ApiResponse(responseCode = "404", description = "Tâche inconnu")
+    })
     @GetMapping()
-    public List<TaskHistoryResponse> findByTask(@PathVariable Long taskId, @RequestParam Long userId) {
+    public List<TaskHistoryResponse> findByTask(
+            @Parameter(description = "Identifiant de la tâche", example = "1") @PathVariable Long taskId,
+            @Parameter(description = "Identifiant de l'utilisateur qui requête", example = "1") @RequestParam Long userId) {
         return this.taskHistoryService.findByTask(taskId, userId);
     }
-    
+
 }
